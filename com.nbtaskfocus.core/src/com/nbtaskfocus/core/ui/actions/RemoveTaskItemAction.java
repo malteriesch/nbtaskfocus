@@ -25,8 +25,14 @@ package com.nbtaskfocus.core.ui.actions;
 
 import com.nbtaskfocus.core.ui.ContextManager;
 import com.nbtaskfocus.model.api.TaskItem;
+import com.nbtaskfocus.model.api.TaskList;
 import java.awt.event.ActionEvent;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.swing.AbstractAction;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 /**
@@ -47,6 +53,23 @@ public class RemoveTaskItemAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {     
         taskItem.setSticky(false);
         ContextManager.getDefault().deactivateTaskItem(taskItem);
+
+        TaskList taskList = TaskList.getDefault();
+
+        String itemPath = taskItem.getItemPath();
+        String projectPath = null;
+        try {
+            Project project = FileOwnerQuery.getOwner(new URI("file://"+itemPath));
+            if (null != project) {
+                projectPath = project.getProjectDirectory().getPath();
+            }
+        } catch (URISyntaxException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
+        
+
+        taskList.removeContextItem(itemPath, projectPath);
     }
     
 }
